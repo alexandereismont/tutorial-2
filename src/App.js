@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import Person from './Person/Person'
+import Radium, {StyleRoot} from 'radium';
 
 //hooks, use functions, add function to user components 
 const App1 = props => {
@@ -44,9 +45,9 @@ const App1 = props => {
 class App extends React.Component{
   state = {
     persons: [
-      {name : 'Alex', age:29},
-      {name : 'Tom',  age:28},
-      {name : 'Tom1',  age:28}
+      {id : '1', name : 'Alex', age:29},
+      {id : '2', name : 'Tom',  age:28},
+      {id : '3', name : 'Tom1',  age:28}
     ],
     otherState: 'some other value',
     showPersons: false
@@ -73,15 +74,28 @@ class App extends React.Component{
     })
   }
 
-  namechangeHandler = (event) => {
-    this.setState(
+  namechangeHandler = (event, id ) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id === id;
+    });
+
+    const person = { ...this.state.persons[personIndex]};
+    // const person = Object.assign({}, this.state.persons[personIndex])
+
+    person.name = event.target.value;
+
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
+    /*this.setState(
       {
         persons: [
             {name : "Alexander", age:29},
             {name : event.target.value,  age:28.5}
         ]
       }
-    );
+    );*/
+    this.setState({persons: persons});
   }
 
   tooglePersonsHandler = () => {
@@ -94,20 +108,48 @@ class App extends React.Component{
 
   render(){
     const style = {
-        backgroundColor: 'white',
-        font: 'inherit',
-        border: '1px solid blue',
-        padding: '8px',
-        cursor: 'pointer'
-      };
+      backgroundColor: 'green',
+      color: 'white',
+      font: 'inherit',
+      border: '1px solid blue',
+      padding: '8px',
+      cursor: 'pointer',
+      ':hover': {
+        backgroundColor: 'lightgreen',
+        color: 'black'
+      }
+    };
+
+    if (this.state.showPersons) {
+      style.backgroundColor = 'red';
+      style[':hover'] = {
+        backgroundColor: 'salmon',
+        color: 'black'
+      }
+    }else{
+      style.backgroundColor = 'green';
+      style[':hover'] = {
+        backgroundColor: 'lightgreen',
+        color: 'black'
+      }
+    }
 
     let persons = null;
-
     persons = this.personsMethod(persons);
 
+    let classes = []; //"red bold"
+    if(this.state.persons.length <= 2){
+      classes.push('red');
+    }
+    if(this.state.persons.length <= 1){
+      classes.push('bold');
+    }
+
     return (
+      <StyleRoot>
       <div className="App">
         <h1>I'm React</h1>
+        <p className={classes.join(' ')}>This is working</p>
         <button 
           style= {style}
          // onClick={() => this.switchNameHandler('Alexander')}>Switch Name
@@ -115,6 +157,7 @@ class App extends React.Component{
         </button>
         {persons}
       </div>
+      </StyleRoot>
         
     );
   }
@@ -128,6 +171,8 @@ class App extends React.Component{
             click={this.deletePersonHandler.bind(this,index)}
             name={person.name} 
             age={person.age}
+            key={person.id} 
+            changed={(event) => this.namechangeHandler(event, person.id)}
             />
         })}
       </div>);
@@ -146,4 +191,4 @@ class App extends React.Component{
 */
  // }
 
-export default App;
+export default Radium(App);
